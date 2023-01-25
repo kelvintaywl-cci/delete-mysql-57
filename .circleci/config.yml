@@ -14,6 +14,7 @@ jobs:
       - image: << parameters.mysql-image >>
         environment:
           MYSQL_DATABASE: foobar
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
     steps:
       - checkout
       - run:
