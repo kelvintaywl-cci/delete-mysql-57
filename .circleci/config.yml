@@ -41,13 +41,33 @@ jobs:
           command: |
             mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> -e "SELECT * FROM staff"
 workflows:
-  main:
+  "cimg_mysql_5_7":
     jobs:
       - insert-fixtures:
           matrix:
             parameters:
               mysql-image:
                 - "cimg/mysql:5.7"
+              mysql-connection-charset:
+                - "utf8"  # will fail
+                - "utf8mb4"  # will pass
+  "circleci-mysql-5_7":
+    jobs:
+      - insert-fixtures:
+          matrix:
+            parameters:
+              mysql-image:
+                - "circleci/mysql:5.7"
+              mysql-connection-charset:
+                - "utf8"  # will fail
+                - "utf8mb4"  # will pass
+  "mysql-5_7":
+    jobs:
+      - insert-fixtures:
+          matrix:
+            parameters:
+              mysql-image:
+                - "mysql:5.7"
               mysql-connection-charset:
                 - "utf8"  # will fail
                 - "utf8mb4"  # will pass
