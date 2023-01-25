@@ -27,7 +27,7 @@ jobs:
       - run:
           name: create schema
           command: |
-            mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> < schema.sql
+            mysql -h 127.0.0.1 -u root foobar < schema.sql
       - run:
           name: insert fixtures
           command: |
