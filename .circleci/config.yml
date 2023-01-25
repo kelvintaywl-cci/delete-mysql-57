@@ -32,7 +32,10 @@ jobs:
           name: insert fixtures
           command: |
             mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> < fixtures.sql
-
+      - run:
+          name: query table
+          command: |
+            mysql -h 127.0.0.1 -u root foobar -e "SELECT * FROM staff"
 workflows:
   main:
     jobs:
