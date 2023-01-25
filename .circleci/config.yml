@@ -25,9 +25,13 @@ jobs:
             which mysql
             mysql --version
       - run:
+          name: wait for DB
+          command: |
+            dockerize -wait tcp://127.0.0.1:3306 -timeout 1m
+      - run:
           name: create schema
           command: |
-            mysql -h 127.0.0.1 -u root foobar < schema.sql
+            mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> < schema.sql
       - run:
           name: insert fixtures
           command: |
@@ -35,7 +39,7 @@ jobs:
       - run:
           name: query table
           command: |
-            mysql -h 127.0.0.1 -u root foobar -e "SELECT * FROM staff"
+            mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> -e "SELECT * FROM staff"
 workflows:
   main:
     jobs:
