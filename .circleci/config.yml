@@ -42,4 +42,5 @@ workflows:
               mysql-image:
                 - "cimg/mysql:5.7"
               mysql-connection-charset:
-                - "utf8"
+                - "utf8"  # will fail
+                - "utf8mb4"  # will pass
