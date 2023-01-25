@@ -19,7 +19,7 @@ jobs:
       - run:
           name: install MySQL client
           command: |
-            sudo apt -y update && apt install mysql-client
+            sudo apt -y update && sudo apt install -y mysql-client
 
             which mysql
             mysql --version
