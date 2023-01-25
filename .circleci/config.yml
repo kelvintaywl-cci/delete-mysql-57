@@ -1,0 +1,44 @@
+version: 2.1
+
+jobs:
+  insert-fixtures:
+    parameters:
+      mysql-image:
+        description: Docker image for MySQL
+        type: string
+      mysql-connection-charset:
+        description: charset to use in MySQL cli connections
+        type: string
+    docker:
+      - image: cimg/node:16.10.0
+      - image: << parameters.mysql-image >>
+        environment:
+          MYSQL_DATABASE: foobar
+    steps:
+      - checkout
+      - run:
+          name: install MySQL client
+          command: |
+            sudo apt -y update && apt install mysql-client
+
+            which mysql
+            mysql --version
+      - run:
+          name: create schema
+          command: |
+            mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> < schema.sql
+      - run:
+          name: insert fixtures
+          command: |
+            mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> < fixtures.sql
+
+workflows:
+  main:
+    jobs:
+      - insert-fixtures:
+          matrix:
+            parameters:
+              mysql-image:
+                - "cimg/mysql:5.7"
+              mysql-connection-charset:
+                - "utf8"
