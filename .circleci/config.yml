@@ -1,73 +1,29 @@
 version: 2.1
 
 jobs:
-  insert-fixtures:
-    parameters:
-      mysql-image:
-        description: Docker image for MySQL
-        type: string
-      mysql-connection-charset:
-        description: charset to use in MySQL cli connections
-        type: string
-    docker:
-      - image: cimg/node:16.10.0
-      - image: << parameters.mysql-image >>
-        environment:
-          MYSQL_DATABASE: foobar
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+  mariadb:
+    machine:
+      image: ubuntu-2204:2023.02.1
     steps:
-      - checkout
       - run:
-          name: install MySQL client
+          name: Spin up MariaDB
           command: |
-            sudo apt -y update && sudo apt install -y mysql-client
-
-            which mysql
-            mysql --version
+            docker run --name db -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -p 3306:3306 -d docker.io/library/mariadb:10.3
       - run:
-          name: wait for DB
+          name: Install dockerize
           command: |
-            dockerize -wait tcp://127.0.0.1:3306 -timeout 1m
-      - run:
-          name: create schema
-          command: |
-            mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> < schema.sql
-      - run:
-          name: insert fixtures
-          command: |
-            mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> < fixtures.sql
-      - run:
-          name: query table
-          command: |
-            mysql -h 127.0.0.1 -u root foobar --default-character-set=<< parameters.mysql-connection-charset >> -e "SELECT * FROM staff"
+            wget https://github.com/jwilder/dockerize/releases/download/v0.6.0/dockerize-linux-amd64-v0.6.0.tar.gz
+            sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-v0.6.0.tar.gz
+      - run: |
+          dockerize -wait tcp://127.0.0.1:3306 -timeout 20s
+      - run: |
+          mysql -u root -h 127.0.0.1 -e "show databases;"
+      - run: |
+          mysql -u root -h 127.0.0.1 -e "CREATE DATABASE drupal;"
+      - run: |
+          mysql -u root -h 127.0.0.1 -e "show databases;"
+ 
 workflows:
-  "cimg_mysql_5_7":
+  main:
     jobs:
-      - insert-fixtures:
-          matrix:
-            parameters:
-              mysql-image:
-                - "cimg/mysql:5.7"
-              mysql-connection-charset:
-                - "utf8"  # will fail
-                - "utf8mb4"  # will pass
-  "circleci-mysql-5_7":
-    jobs:
-      - insert-fixtures:
-          matrix:
-            parameters:
-              mysql-image:
-                - "circleci/mysql:5.7"
-              mysql-connection-charset:
-                - "utf8"  # will fail
-                - "utf8mb4"  # will pass
-  "mysql-5_7":
-    jobs:
-      - insert-fixtures:
-          matrix:
-            parameters:
-              mysql-image:
-                - "mysql:5.7"
-              mysql-connection-charset:
-                - "utf8"  # will fail
-                - "utf8mb4"  # will pass
+      - mariadb
