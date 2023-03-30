@@ -10,6 +10,11 @@ jobs:
           command: |
             docker run --name db -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -p 3306:3306 -d docker.io/library/mariadb:10.3
       - run:
+          name: Install MySQL client
+          command: |
+            sudo apt -y update
+            sudo apt -y install mysql-client
+      - run:
           name: Install dockerize
           command: |
             wget https://github.com/jwilder/dockerize/releases/download/v0.6.0/dockerize-linux-amd64-v0.6.0.tar.gz
